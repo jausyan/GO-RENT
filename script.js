@@ -2,7 +2,12 @@ const form = document.getElementById("rentalForm");
 const statusText = document.getElementById("status");
 const fileInput = document.getElementById("bukti");
 const fileNameDisplay = document.getElementById("fileName");
+const checkboxes = document.querySelectorAll(".item-checkbox");
+const priceDisplay = document.getElementById("priceDisplay");
+const totalPriceElement = document.getElementById("totalPrice");
+const selectedItemsElement = document.getElementById("selectedItems");
 
+// File upload feedback
 fileInput.addEventListener("change", (e) => {
   if (e.target.files[0]) {
     fileNameDisplay.textContent = "✓ " + e.target.files[0].name;
@@ -13,22 +18,74 @@ fileInput.addEventListener("change", (e) => {
   }
 });
 
+// Handle item selection and price calculation
+checkboxes.forEach((checkbox) => {
+  checkbox.addEventListener("change", () => {
+    const selectedCheckboxes = document.querySelectorAll(".item-checkbox:checked");
+    
+    // Limit to 4 items
+    if (selectedCheckboxes.length > 4) {
+      checkbox.checked = false;
+      alert("Maksimal 4 alat yang dapat dipilih!");
+      return;
+    }
+
+    // Calculate total price
+    let totalPrice = 0;
+    const selectedItems = [];
+    
+    selectedCheckboxes.forEach((cb) => {
+      totalPrice += parseInt(cb.dataset.price);
+      selectedItems.push(cb.value);
+    });
+
+    // Update display
+    if (selectedCheckboxes.length > 0) {
+      priceDisplay.classList.remove("hidden");
+      totalPriceElement.textContent = `Rp ${totalPrice.toLocaleString("id-ID")}`;
+      selectedItemsElement.textContent = `Dipilih: ${selectedItems.join(", ")}`;
+    } else {
+      priceDisplay.classList.add("hidden");
+    }
+  });
+});
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const fileInput = document.getElementById("bukti");
-  const file = fileInput.files[0];
+  // Validate at least one item is selected
+  const selectedCheckboxes = document.querySelectorAll(".item-checkbox:checked");
+  if (selectedCheckboxes.length === 0) {
+    alert("Pilih minimal 1 alat untuk dipinjam!");
+    return;
+  }
 
+  const file = fileInput.files[0];
   const reader = new FileReader();
 
   reader.onload = async function () {
     const base64 = reader.result;
 
+    // Prepare items data (item_1, item_2, item_3, item_4)
+    const itemsData = {
+      item_1: "",
+      item_2: "",
+      item_3: "",
+      item_4: ""
+    };
+
+    let totalPrice = 0;
+    selectedCheckboxes.forEach((cb, index) => {
+      itemsData[`item_${index + 1}`] = cb.value;
+      totalPrice += parseInt(cb.dataset.price);
+    });
+
     const data = {
       nama: document.getElementById("nama").value,
       no_hp: document.getElementById("no_hp").value,
       alamat: document.getElementById("alamat").value,
-      alat: document.getElementById("alat").value,
+      ...itemsData,
+      price_total: totalPrice,
       tanggal_sewa: document.getElementById("tanggal_sewa").value,
       filename: file.name,
       bukti_base64: base64
@@ -52,6 +109,7 @@ form.addEventListener("submit", async (e) => {
       statusText.innerText = "✓ Berhasil dikirim! Terima kasih telah mempercayai GoRent 🚀";
       form.reset();
       fileNameDisplay.classList.add("hidden");
+      priceDisplay.classList.add("hidden");
       setTimeout(() => {
         statusText.classList.add("hidden");
       }, 5000);
