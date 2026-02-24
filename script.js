@@ -27,7 +27,7 @@ form.addEventListener("submit", async (e) => {
       nama: document.getElementById("nama").value,
       no_hp: document.getElementById("no_hp").value,
       alamat: document.getElementById("alamat").value,
-      alat: document.getElementById("alat").value,
+      instansi: document.getElementById("alat").value,
       tanggal_sewa: document.getElementById("tanggal_sewa").value,
       filename: file.name,
       bukti_base64: base64
