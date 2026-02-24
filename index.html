@@ -1,11 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>GoRent - Form Peminjaman</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>hello world</h1>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-center">Form Peminjaman</h1>
+
+    <form id="rentalForm" class="space-y-4">
+      <input type="text" id="nama" placeholder="Nama Lengkap" required class="w-full p-2 border rounded" />
+      <input type="text" id="no_hp" placeholder="No HP" required class="w-full p-2 border rounded" />
+      <input type="text" id="alamat" placeholder="Alamat" required class="w-full p-2 border rounded" />
+      <input type="text" id="alat" placeholder="Alat yang Dipinjam" required class="w-full p-2 border rounded" />
+      <input type="date" id="tanggal_sewa" required class="w-full p-2 border rounded" />
+
+      <label class="block">
+        Upload Bukti Transfer:
+        <input type="file" id="bukti" accept="image/*" required class="mt-2" />
+      </label>
+
+      <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+        Kirim
+      </button>
+    </form>
+
+    <p id="status" class="mt-4 text-center"></p>
+  </div>
+
+<script>
+const form = document.getElementById("rentalForm");
+const statusText = document.getElementById("status");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const fileInput = document.getElementById("bukti");
+  const file = fileInput.files[0];
+
+  const reader = new FileReader();
+
+  reader.onload = async function () {
+    const base64 = reader.result;
+
+    const data = {
+      nama: document.getElementById("nama").value,
+      no_hp: document.getElementById("no_hp").value,
+      alamat: document.getElementById("alamat").value,
+      alat: document.getElementById("alat").value,
+      tanggal_sewa: document.getElementById("tanggal_sewa").value,
+      filename: file.name,
+      bukti_base64: base64
+    };
+
+    statusText.innerText = "Mengirim...";
+
+    const response = await fetch("/.netlify/functions/createRental", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      statusText.innerText = "Berhasil dikirim 🚀";
+      form.reset();
+    } else {
+      statusText.innerText = "Terjadi error ❌";
+      console.error(result);
+    }
+  };
+
+  reader.readAsDataURL(file);
+});
+</script>
+
 </body>
 </html>
