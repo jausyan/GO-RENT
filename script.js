@@ -95,7 +95,7 @@ form.addEventListener("submit", async (e) => {
     statusText.classList.add("bg-blue-900/30", "text-blue-400", "border", "border-blue-700/50");
     statusText.innerText = "Mengirim data...";
 
-    const response = await fetch("/.netlify/functions/createRental", {
+    const response = await fetch("/functions/createRental", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)

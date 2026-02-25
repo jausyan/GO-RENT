@@ -14,7 +14,7 @@ async function fetchRentalData() {
   }
 
   try {
-    const response = await fetch(`/.netlify/functions/getRental?id=${rentalId}`);
+    const response = await fetch(`/functions/getRental?id=${rentalId}`);
     
     if (!response.ok) {
       showError();
