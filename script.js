@@ -106,13 +106,15 @@ form.addEventListener("submit", async (e) => {
     if (response.ok) {
       statusText.classList.remove("bg-blue-900/30", "text-blue-400", "border-blue-700/50");
       statusText.classList.add("bg-green-900/30", "text-[#3fb950]", "border", "border-green-700/50");
-      statusText.innerText = "✓ Berhasil dikirim! Terima kasih telah mempercayai GoRent 🚀";
-      form.reset();
-      fileNameDisplay.classList.add("hidden");
-      priceDisplay.classList.add("hidden");
-      setTimeout(() => {
-        statusText.classList.add("hidden");
-      }, 5000);
+      statusText.innerText = "✓ Berhasil dikirim! Mengalihkan ke halaman verifikasi...";
+      
+      // Store rental ID and redirect to verification page
+      if (result.data && result.data[0]) {
+        const rentalId = result.data[0].id;
+        setTimeout(() => {
+          window.location.href = `verify.html?id=${rentalId}`;
+        }, 1500);
+      }
     } else {
       statusText.classList.remove("bg-blue-900/30", "text-blue-400", "border-blue-700/50");
       statusText.classList.add("bg-red-900/30", "text-red-400", "border", "border-red-700/50");
