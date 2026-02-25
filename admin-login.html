@@ -6,8 +6,18 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Netlify Identity Widget -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    /* Hide body until identity is ready */
+    body.loading {
+      opacity: 0;
+    }
+    body.ready {
+      opacity: 1;
+      transition: opacity 0.3s ease-in;
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-[#0d1117] via-[#161b22] to-[#0d1117] flex items-center justify-center min-h-screen p-4">
+<body class="loading bg-gradient-to-br from-[#0d1117] via-[#161b22] to-[#0d1117] flex items-center justify-center min-h-screen p-4">
 
   <div class="w-full max-w-md">
     <!-- Header Card -->
@@ -62,39 +72,55 @@
   <script>
     const loginButton = document.getElementById('loginButton');
 
-    // Initialize Netlify Identity
-    if (window.netlifyIdentity) {
-      // Check if user is already logged in
-      const user = netlifyIdentity.currentUser();
-      
-      if (user) {
-        // User is logged in, redirect to admin panel
-        console.log('User already logged in:', user);
-        window.location.href = 'admin-panel.html';
+    // Wait for Netlify Identity to be ready
+    function initIdentity() {
+      if (window.netlifyIdentity) {
+        netlifyIdentity.on('init', user => {
+          // Identity is initialized
+          if (user) {
+            // User is already logged in, redirect immediately
+            window.location.href = 'admin-panel.html';
+          } else {
+            // No user, show login page
+            document.body.classList.remove('loading');
+            document.body.classList.add('ready');
+          }
+        });
+
+        // Login button click handler
+        loginButton.addEventListener('click', () => {
+          netlifyIdentity.open();
+        });
+
+        // Listen for login event
+        netlifyIdentity.on('login', (user) => {
+          console.log('Login successful:', user);
+          // Redirect to admin panel
+          window.location.href = 'admin-panel.html';
+        });
+
+        // Listen for error event
+        netlifyIdentity.on('error', (err) => {
+          console.error('Identity error:', err);
+          alert('Terjadi kesalahan saat login. Silakan coba lagi.');
+        });
+
+        // Initialize
+        netlifyIdentity.init();
+      } else {
+        // Fallback if netlifyIdentity doesn't load
+        setTimeout(() => {
+          document.body.classList.remove('loading');
+          document.body.classList.add('ready');
+        }, 1000);
       }
+    }
 
-      // Login button click handler
-      loginButton.addEventListener('click', () => {
-        netlifyIdentity.open();
-      });
-
-      // Listen for login event
-      netlifyIdentity.on('login', (user) => {
-        console.log('Login successful:', user);
-        // Redirect to admin panel
-        window.location.href = 'admin-panel.html';
-      });
-
-      // Listen for logout event
-      netlifyIdentity.on('logout', () => {
-        console.log('User logged out');
-      });
-
-      // Listen for error event
-      netlifyIdentity.on('error', (err) => {
-        console.error('Identity error:', err);
-        alert('Terjadi kesalahan saat login. Silakan coba lagi.');
-      });
+    // Initialize when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initIdentity);
+    } else {
+      initIdentity();
     }
   </script>
 

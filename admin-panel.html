@@ -6,10 +6,28 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Netlify Identity Widget -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    /* Hide content until identity check is complete */
+    #mainContent {
+      display: none;
+    }
+    #loadingScreen {
+      display: flex;
+    }
+  </style>
 </head>
 <body class="bg-gradient-to-br from-[#0d1117] via-[#161b22] to-[#0d1117] min-h-screen p-4">
 
-  <div class="max-w-6xl mx-auto">
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="fixed inset-0 bg-[#0d1117] flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1f6feb] mb-4"></div>
+      <p class="text-[#8b949e]">Memverifikasi akses...</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div id="mainContent" class="max-w-6xl mx-auto">
     
     <!-- Header -->
     <div class="bg-gradient-to-r from-[#1c2128] to-[#161b22] border border-[#30363d] rounded-2xl p-6 shadow-2xl mb-6">
@@ -79,38 +97,54 @@
   </div>
 
   <script>
-    // Check if user is logged in
-    if (window.netlifyIdentity) {
-      const user = netlifyIdentity.currentUser();
-      
-      if (!user) {
-        // Not logged in, redirect to login page
-        console.log('No user logged in, redirecting...');
-        window.location.href = 'admin-login.html';
-      } else {
-        // User is logged in, display info
-        console.log('Current user:', user);
-        
-        // Display user info in header
-        document.getElementById('userName').textContent = user.user_metadata?.full_name || 'Admin';
-        document.getElementById('userEmail').textContent = user.email || '';
-        
-        // Display user info in content
-        document.getElementById('displayName').textContent = user.user_metadata?.full_name || 'Admin';
-        document.getElementById('displayEmail').textContent = user.email || '';
-        document.getElementById('displayId').textContent = user.id || '';
-      }
+    // Wait for Netlify Identity to initialize
+    function initIdentity() {
+      if (window.netlifyIdentity) {
+        netlifyIdentity.on('init', user => {
+          // Hide loading screen
+          document.getElementById('loadingScreen').style.display = 'none';
+          
+          if (!user) {
+            // Not logged in, redirect to login page
+            console.log('No user logged in, redirecting...');
+            window.location.href = 'admin-login.html';
+          } else {
+            // User is logged in, show content
+            console.log('Current user:', user);
+            document.getElementById('mainContent').style.display = 'block';
+            
+            // Display user info in header
+            document.getElementById('userName').textContent = user.user_metadata?.full_name || 'Admin';
+            document.getElementById('userEmail').textContent = user.email || '';
+            
+            // Display user info in content
+            document.getElementById('displayName').textContent = user.user_metadata?.full_name || 'Admin';
+            document.getElementById('displayEmail').textContent = user.email || '';
+            document.getElementById('displayId').textContent = user.id || '';
+          }
+        });
 
-      // Logout button handler
-      document.getElementById('logoutButton').addEventListener('click', () => {
-        if (confirm('Apakah Anda yakin ingin logout?')) {
-          netlifyIdentity.logout();
-          window.location.href = 'admin-login.html';
-        }
-      });
+        // Logout button handler
+        document.getElementById('logoutButton').addEventListener('click', () => {
+          if (confirm('Apakah Anda yakin ingin logout?')) {
+            netlifyIdentity.logout();
+            window.location.href = 'admin-login.html';
+          }
+        });
+
+        // Initialize
+        netlifyIdentity.init();
+      } else {
+        console.error('Netlify Identity not loaded');
+        alert('Error: Netlify Identity tidak dapat dimuat');
+      }
+    }
+
+    // Initialize when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initIdentity);
     } else {
-      console.error('Netlify Identity not loaded');
-      alert('Error: Netlify Identity tidak dapat dimuat');
+      initIdentity();
     }
   </script>
 
