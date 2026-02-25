@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - GoRent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Netlify Identity Widget -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body class="bg-gradient-to-br from-[#0d1117] via-[#161b22] to-[#0d1117] min-h-screen p-4">
+
+  <div class="max-w-6xl mx-auto">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-[#1c2128] to-[#161b22] border border-[#30363d] rounded-2xl p-6 shadow-2xl mb-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <img src="images/JMMI-rm.png" alt="JMMI Logo" class="w-10 h-10 mr-3 object-contain" />
+          <div>
+            <h1 class="text-2xl font-bold text-white">Admin Panel</h1>
+            <p class="text-[#8b949e] text-sm">JMMI GoRent Management</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <p class="text-[#c9d1d9] font-semibold" id="userName">Loading...</p>
+            <p class="text-[#8b949e] text-xs" id="userEmail">Loading...</p>
+          </div>
+          <button 
+            id="logoutButton"
+            class="bg-red-900/30 border border-red-700/50 text-red-400 px-4 py-2 rounded-lg hover:bg-red-900/50 transition-all duration-200"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Content -->
+    <div class="bg-[#0d1117] border border-[#30363d] rounded-2xl p-8 shadow-2xl">
+      
+      <!-- Success Message -->
+      <div class="text-center py-12">
+        <svg class="w-24 h-24 text-[#3fb950] mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h2 class="text-3xl font-bold text-[#3fb950] mb-4">🎉 Login Berhasil!</h2>
+        <p class="text-[#c9d1d9] text-lg mb-2">Selamat datang di Admin Panel GoRent</p>
+        <p class="text-[#8b949e] mb-8">Anda berhasil login menggunakan Netlify Identity</p>
+        
+        <!-- User Info Box -->
+        <div class="max-w-md mx-auto bg-[#1c2128] border border-[#30363d] rounded-lg p-6">
+          <h3 class="text-[#c9d1d9] font-bold mb-4">Informasi Login:</h3>
+          <div class="space-y-3 text-left">
+            <div class="flex justify-between border-b border-[#30363d] pb-2">
+              <span class="text-[#8b949e]">Nama:</span>
+              <span class="text-[#c9d1d9] font-semibold" id="displayName">-</span>
+            </div>
+            <div class="flex justify-between border-b border-[#30363d] pb-2">
+              <span class="text-[#8b949e]">Email:</span>
+              <span class="text-[#c9d1d9] font-semibold" id="displayEmail">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#8b949e]">User ID:</span>
+              <span class="text-[#58a6ff] font-mono text-sm" id="displayId">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test Message -->
+        <div class="mt-8 bg-green-900/20 border border-green-700/50 rounded-lg p-4 max-w-md mx-auto">
+          <p class="text-[#3fb950] font-semibold">✓ Autentikasi Berhasil</p>
+          <p class="text-[#8b949e] text-sm mt-2">Halaman admin panel sudah siap dikembangkan lebih lanjut</p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Check if user is logged in
+    if (window.netlifyIdentity) {
+      const user = netlifyIdentity.currentUser();
+      
+      if (!user) {
+        // Not logged in, redirect to login page
+        console.log('No user logged in, redirecting...');
+        window.location.href = 'admin-login.html';
+      } else {
+        // User is logged in, display info
+        console.log('Current user:', user);
+        
+        // Display user info in header
+        document.getElementById('userName').textContent = user.user_metadata?.full_name || 'Admin';
+        document.getElementById('userEmail').textContent = user.email || '';
+        
+        // Display user info in content
+        document.getElementById('displayName').textContent = user.user_metadata?.full_name || 'Admin';
+        document.getElementById('displayEmail').textContent = user.email || '';
+        document.getElementById('displayId').textContent = user.id || '';
+      }
+
+      // Logout button handler
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        if (confirm('Apakah Anda yakin ingin logout?')) {
+          netlifyIdentity.logout();
+          window.location.href = 'admin-login.html';
+        }
+      });
+    } else {
+      console.error('Netlify Identity not loaded');
+      alert('Error: Netlify Identity tidak dapat dimuat');
+    }
+  </script>
+
+</body>
+</html>
